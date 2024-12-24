@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data  # для сохранения данных PostgreSQL
+    container_name: db
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./:/var/www/
+    container_name: redis
+    networks:
+      - mynetwork
+
+  app:
+    build:
+      context: .
+      dockerfile: _docker/app/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./:/var/www/
+    container_name: script_app
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
